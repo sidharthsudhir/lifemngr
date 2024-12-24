@@ -61,8 +61,9 @@ export default function HabitsPage() {
                 completions={habitCompletions.map(completion => ({
                   completed_at: completion.completed_date
                 }))}
-                readOnly={true}
-              />
+                readOnly={true} onToggle={function (): void {
+                  throw new Error('Function not implemented.')
+                } }              />
             )
           })}
         </div>

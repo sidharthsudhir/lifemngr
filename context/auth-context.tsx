@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 const supabase = createClientComponentClient()
 
@@ -18,43 +19,59 @@ const AuthContext = createContext<AuthContextType>({
   loading: true
 })
 
+interface User {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  createdAt: string
+  subscriptionStatus: 'basic' | 'pro'
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any>(null)
   const [session, setSession] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
-    const autoLogin = async () => {
+    const fetchUser = async () => {
       try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: 'sidharthsudhir12@gmail.com',
-          password: 'Jinzita123!'
-        })
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) throw sessionError
 
-        if (error) throw error
-
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
-        
-        // Ensure the user object has the correct ID
-        const userWithCorrectId = {
-          ...currentSession?.user,
-          id: '7698a174-c76a-4f67-96b1-07c3cac71692'
+        if (!session) {
+          setUser(null)
+          setLoading(false)
+          return
         }
-        
-        setSession({
-          ...currentSession,
-          user: userWithCorrectId
+
+        // Get the user profile data from the profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+
+        if (profileError) throw profileError
+
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          createdAt: profile.created_at || new Date().toISOString(),
+          subscriptionStatus: profile.subscription_status,
         })
-        setUser(userWithCorrectId)
-      } catch (error: any) {
-        console.error('Auto-login failed:', error)
-        toast.error('Failed to authenticate')
+      } catch (error) {
+        console.error('Error:', error)
+        setUser(null)
       } finally {
         setLoading(false)
       }
     }
 
-    autoLogin()
+    fetchUser()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
@@ -77,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase, router])
 
   return (
     <AuthContext.Provider value={{ user, session, loading }}>

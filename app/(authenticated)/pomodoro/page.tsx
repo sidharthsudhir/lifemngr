@@ -144,7 +144,7 @@ export default function PomodoroPage() {
     <div className="space-y-8">
       <Header title="Pomodoro Timer" />
       <div className="container mx-auto">
-        <Alert variant="warning" className="mb-8">
+        <Alert variant="default" className="mb-8">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Warning</AlertTitle>
           <AlertDescription>
