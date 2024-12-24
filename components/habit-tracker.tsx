@@ -97,6 +97,7 @@ export function HabitTracker({ habit, completions, onToggle, readOnly = false }:
             <div className="flex items-center gap-1 text-sm text-orange-500">
               <Flame className="h-4 w-4" />
               <span>{currentStreak}</span>
+              <span>day streak</span>
             </div>
           )}
         </div>
