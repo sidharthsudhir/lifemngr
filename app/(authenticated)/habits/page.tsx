@@ -10,7 +10,7 @@ import { useHabits } from '@/context/habits-context'
 
 export default function HabitsPage() {
   const { user, loading: authLoading } = useAuth()
-  const { habits, completions, toggleHabit, loading: habitsLoading } = useHabits()
+  const { habits, completions, loading: habitsLoading } = useHabits()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function HabitsPage() {
           <p className="text-muted-foreground">Create your first habit to get started!</p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="max-w-5xl mx-auto px-4 space-y-8">
           {habits.map((habit) => {
             const habitCompletions = completions.filter(
               completion => completion.habit_id === habit.id
@@ -56,12 +56,12 @@ export default function HabitsPage() {
                 key={habit.id}
                 habit={{
                   id: habit.id,
-                  name: habit.title // Changed from name to title to match Supabase schema
+                  name: habit.title
                 }}
                 completions={habitCompletions.map(completion => ({
                   completed_at: completion.completed_date
                 }))}
-                onToggle={() => toggleHabit(habit.id, format(new Date(), 'yyyy-MM-dd'))}
+                readOnly={true}
               />
             )
           })}

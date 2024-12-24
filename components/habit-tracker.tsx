@@ -1,9 +1,20 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { eachDayOfInterval, format, isSameDay, startOfMonth, endOfMonth, subMonths, addMonths, isToday } from 'date-fns'
 import { cn } from "@/lib/utils"
-import { Flame } from 'lucide-react'
+import { Flame, Trash2Icon } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useHabits } from "@/context/habits-context"
 
 interface HabitTrackerProps {
   habit: {
@@ -12,9 +23,13 @@ interface HabitTrackerProps {
   }
   completions: Array<{ completed_at: string }>
   onToggle: () => void
+  readOnly?: boolean
 }
 
-export function HabitTracker({ habit, completions, onToggle }: HabitTrackerProps) {
+export function HabitTracker({ habit, completions, onToggle, readOnly = false }: HabitTrackerProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const { deleteHabit } = useHabits()
+
   const months = useMemo(() => {
     const today = new Date()
     const sevenMonthsAgo = subMonths(today, 7)
@@ -68,6 +83,11 @@ export function HabitTracker({ habit, completions, onToggle }: HabitTrackerProps
     return 'bg-green-500'
   }
 
+  const handleDelete = async () => {
+    await deleteHabit(habit.id)
+    setShowDeleteDialog(false)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -80,24 +100,35 @@ export function HabitTracker({ habit, completions, onToggle }: HabitTrackerProps
             </div>
           )}
         </div>
-        <button
-          onClick={onToggle}
-          className={cn(
-            "px-3 py-1 rounded-md text-sm transition-colors",
-            completions.some(c => isSameDay(new Date(c.completed_at), new Date()))
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-muted hover:bg-muted/80"
+        <div className="flex items-center gap-2">
+          {!readOnly && (
+            <button
+              onClick={onToggle}
+              className={cn(
+                "px-3 py-1 rounded-md text-sm transition-colors",
+                completions.some(c => isSameDay(new Date(c.completed_at), new Date()))
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-muted hover:bg-muted/80"
+              )}
+            >
+              {completions.some(c => isSameDay(new Date(c.completed_at), new Date()))
+                ? "Completed"
+                : "Mark Complete"}
+            </button>
           )}
-        >
-          {completions.some(c => isSameDay(new Date(c.completed_at), new Date()))
-            ? "Completed"
-            : "Mark Complete"}
-        </button>
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            className="p-2 text-red-500 hover:text-red-600 rounded-full hover:bg-red-500/10"
+            title="Delete habit"
+          >
+            <Trash2Icon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="flex justify-between w-full">
+      <div className="flex justify-between w-full gap-4">
         {months.map(({ month, days }) => (
-          <div key={month} className="flex flex-col gap-1">
+          <div key={month} className="flex flex-col gap-4">
             <span className="text-xs text-muted-foreground">{month}</span>
             <div className="grid grid-cols-7 gap-1">
               {days.map((day) => (
@@ -118,6 +149,27 @@ export function HabitTracker({ habit, completions, onToggle }: HabitTrackerProps
           </div>
         ))}
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the habit
+              "{habit.name}" and remove all of its completion data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

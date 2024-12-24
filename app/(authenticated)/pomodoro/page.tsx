@@ -9,6 +9,8 @@ import { Play, Pause, RotateCcw } from 'lucide-react'
 import { Label } from "@radix-ui/react-label"
 import { Separator } from "@radix-ui/react-separator"
 import { startOfWeek, addDays, format } from 'date-fns'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertTriangle } from "lucide-react"
 
 type DailyProgress = {
   date: string;
@@ -141,96 +143,113 @@ export default function PomodoroPage() {
   return (
     <div className="space-y-8">
       <Header title="Pomodoro Timer" />
-      <Card className="max-w-4xl mx-auto">
-        <CardContent className="p-6">
-          <div className="flex gap-8">
-            {/* Timer Section */}
-            <div className="flex-1 flex flex-col items-center space-y-6">
-              <div className="text-sm font-medium">
-                {currentSession === 'work' ? 'Work Session' : 
-                 currentSession === 'shortBreak' ? 'Short Break' : 'Long Break'} 
-                {currentSession === 'work' && ` (${sessionCount}/4)`}
-              </div>
-              <div className="text-6xl font-bold">{formatTime(time)}</div>
-              <div className="flex space-x-4">
-                <Button onClick={toggleTimer} size="lg">
-                  {isActive ? <Pause className="mr-2" /> : <Play className="mr-2" />}
-                  {isActive ? 'Pause' : 'Start'}
-                </Button>
-                <Button onClick={resetTimer} variant="outline" size="lg">
-                  <RotateCcw className="mr-2" />
-                  Reset
-                </Button>
-              </div>
-            </div>
-
-            {/* Separator */}
-            <Separator orientation="vertical" className="h-auto" />
-
-            {/* Settings Section */}
-            <div className="w-72 space-y-4">
-              <h3 className="font-semibold text-lg mb-4">Timer Settings</h3>
-              <div className="space-y-2">
-                <Label>Work Session (minutes)</Label>
-                <Input 
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={workTime}
-                  onChange={(e) => updateSettings('work', e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Short Break (minutes)</Label>
-                <Input 
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={shortBreakTime}
-                  onChange={(e) => updateSettings('shortBreak', e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Long Break (minutes)</Label>
-                <Input 
-                  type="number"
-                  min="5"
-                  max="60"
-                  value={longBreakTime}
-                  onChange={(e) => updateSettings('longBreak', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Weekly Progress Card */}
-      <Card className="max-w-4xl mx-auto">
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-lg mb-4">Weekly Progress</h3>
-          <div className="grid grid-cols-7 gap-4">
-            {weeklyProgress.map((day) => (
-              <div 
-                key={day.date} 
-                className="flex flex-col items-center p-4 rounded-lg border"
-              >
+      <div className="container mx-auto">
+        <Alert variant="warning" className="mb-8">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>
+            Please stay on this page while your Pomodoro timer is running. Navigating away from this page will reset your timer.
+          </AlertDescription>
+        </Alert>
+        
+        <Card className="max-w-4xl mx-auto">
+          <CardContent className="p-6">
+            <div className="flex gap-8">
+              {/* Timer Section */}
+              <div className="flex-1 flex flex-col items-center space-y-6">
                 <div className="text-sm font-medium">
-                  {format(new Date(day.date), 'EEE')}
+                  {currentSession === 'work' ? 'Work Session' : 
+                   currentSession === 'shortBreak' ? 'Short Break' : 'Long Break'} 
+                  {currentSession === 'work' && ` (${sessionCount}/4)`}
                 </div>
-                <div className="text-2xl font-bold mt-2">
-                  {day.completedSessions}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  sessions
+                <div className="text-6xl font-bold">{formatTime(time)}</div>
+                <div className="flex space-x-4">
+                  <Button onClick={toggleTimer} size="lg">
+                    {isActive ? <Pause className="mr-2" /> : <Play className="mr-2" />}
+                    {isActive ? 'Pause' : 'Start'}
+                  </Button>
+                  <Button onClick={resetTimer} variant="outline" size="lg">
+                    <RotateCcw className="mr-2" />
+                    Reset
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
+              {/* Separator */}
+              <Separator orientation="vertical" className="h-auto" />
+
+              {/* Settings Section */}
+              <div className="w-72 space-y-4">
+                <h3 className="font-semibold text-lg mb-4">Timer Settings</h3>
+                <div className="space-y-2">
+                  <Label>Work Session (minutes)</Label>
+                  <Input 
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={workTime}
+                    onChange={(e) => updateSettings('work', e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Short Break (minutes)</Label>
+                  <Input 
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={shortBreakTime}
+                    onChange={(e) => updateSettings('shortBreak', e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Long Break (minutes)</Label>
+                  <Input 
+                    type="number"
+                    min="5"
+                    max="60"
+                    value={longBreakTime}
+                    onChange={(e) => updateSettings('longBreak', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Weekly Progress Card */}
+        <Card className="max-w-4xl mx-auto">
+          <CardContent className="p-6">
+            <h3 className="font-semibold text-lg mb-4">Weekly Progress</h3>
+            <div className="grid grid-cols-7 gap-4">
+              {weeklyProgress.map((day) => {
+                const isToday = format(new Date(day.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+                return (
+                  <div 
+                    key={day.date} 
+                    className={`flex flex-col items-center p-4 rounded-lg border
+                      ${isToday ? 'bg-primary/10 border-primary' : 'hover:bg-muted/50'}`}
+                  >
+                    <div className="text-sm font-medium">
+                      {format(new Date(day.date), 'EEE')}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {format(new Date(day.date), 'MMM d')}
+                    </div>
+                    <div className="text-2xl font-bold mt-2">
+                      {day.completedSessions}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      sessions
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

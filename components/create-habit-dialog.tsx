@@ -6,42 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { PlusIcon } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
-import { toast } from 'sonner'
-import { supabase } from "@/lib/supabase"
+import { useHabits } from "@/context/habits-context"
 
 export function CreateHabitDialog() {
   const [open, setOpen] = useState(false)
   const [habitName, setHabitName] = useState("")
-  const [loading, setLoading] = useState(false)
   const { session } = useAuth()
-
-  const addHabit = async (title: string) => {
-    try {
-      if (!session) {
-        toast.error('Please login to create habits')
-        return
-      }
-      setLoading(true)
-      const { error } = await supabase
-        .from('habits')
-        .insert([
-          {
-            title,
-            user_id: session.user.id,
-          }
-        ])
-
-      if (error) throw error
-      toast.success('Habit created successfully')
-
-      // Optionally trigger a refresh of the habits list
-      // This could be achieved via a callback or by re-fetching in the parent component
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create habit')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { addHabit } = useHabits()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,7 +20,6 @@ export function CreateHabitDialog() {
       await addHabit(habitName.trim())
       setHabitName("")
       setOpen(false)
-      // Optionally refresh habits from parent or context
     }
   }
 
@@ -71,8 +41,8 @@ export function CreateHabitDialog() {
             value={habitName}
             onChange={(e) => setHabitName(e.target.value)}
           />
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Creating...' : 'Create Habit'}
+          <Button type="submit" className="w-full">
+            Create Habit
           </Button>
         </form>
       </DialogContent>

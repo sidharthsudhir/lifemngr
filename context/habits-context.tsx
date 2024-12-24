@@ -26,6 +26,7 @@ interface HabitsContextType {
   loading: boolean
   addHabit: (title: string) => Promise<void>
   toggleHabit: (habitId: string, date: string) => Promise<void>
+  deleteHabit: (habitId: string) => Promise<void>
   refreshHabits: () => Promise<void>
   completions: HabitCompletion[]
 }
@@ -137,12 +138,42 @@ export function HabitsProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const deleteHabit = async (habitId: string) => {
+    try {
+      if (!user) throw new Error('User not authenticated')
+
+      // Delete habit completions first (due to foreign key constraint)
+      const { error: completionsError } = await supabase
+        .from('habit_completions')
+        .delete()
+        .eq('habit_id', habitId)
+
+      if (completionsError) throw completionsError
+
+      // Then delete the habit
+      const { error: habitError } = await supabase
+        .from('habits')
+        .delete()
+        .eq('id', habitId)
+        .eq('user_id', user.id)
+
+      if (habitError) throw habitError
+
+      await fetchHabits()
+      toast.success('Habit deleted successfully')
+    } catch (error: any) {
+      console.error('Error deleting habit:', error)
+      toast.error(error.message || 'Failed to delete habit')
+    }
+  }
+
   return (
     <HabitsContext.Provider value={{ 
       habits, 
       loading, 
       addHabit, 
-      toggleHabit, 
+      toggleHabit,
+      deleteHabit,
       refreshHabits: fetchHabits,
       completions 
     }}>
