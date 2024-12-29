@@ -1,0 +1,24 @@
+.nav-menu {
+  background-color: var(--dark-secondary);
+  transition: all 0.3s ease;
+}
+
+body.light-mode .nav-menu {
+  background-color: var(--light-secondary);
+}
+
+.nav-item {
+  color: var(--dark-text);
+}
+
+body.light-mode .nav-item {
+  color: var(--light-text);
+}
+
+.nav-item.active {
+  color: var(--dark-accent);
+}
+
+body.light-mode .nav-item.active {
+  color: var(--light-accent);
+} 

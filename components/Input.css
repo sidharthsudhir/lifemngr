@@ -1,0 +1,22 @@
+.input-field {
+  background-color: var(--dark-background);
+  color: var(--dark-text);
+  border: 1px solid var(--dark-secondary);
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+body.light-mode .input-field {
+  background-color: var(--light-background);
+  color: var(--light-text);
+  border: 1px solid var(--light-secondary);
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+body.light-mode .input-field::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+} 

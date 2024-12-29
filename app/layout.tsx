@@ -1,5 +1,6 @@
 import { AuthProvider } from '@/context/auth-context'
 import { HabitsProvider } from '@/context/habits-context'
+import { ProfileProvider } from '@/context/profile-context'
 import { Inter } from 'next/font/google'
 import { Metadata } from 'next'
 import './globals.css'
@@ -17,9 +18,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <HabitsProvider>
-            {children}
-          </HabitsProvider>
+          <ProfileProvider>
+            <HabitsProvider>
+              {children}
+            </HabitsProvider>
+          </ProfileProvider>
         </AuthProvider>
         <Toaster />
       </body>
